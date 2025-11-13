@@ -1,0 +1,202 @@
+openapi: 3.0.0
+info:
+  title: Self-orchestrator API
+  description: Self-orchestrator API documentation (aeriOS).
+  version: 1.2.0
+
+servers:
+  - url: 'http://localhost:8001'
+
+paths:
+  /alert:
+    post:
+      tags:
+        - Context Information Provision
+      summary: Alert creation
+      requestBody:
+        description: Payload body in the request contains a JSON object which represents the alert that is to be created.
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/Alert'
+                - required:
+                    - errorCode
+      responses:
+        '201':
+          description: Created.
+        '400':
+          description: Bad request.
+  /rule:
+    get:
+      tags:
+        - Context Information Consumption
+      summary: Query rule
+      parameters:
+        - $ref: '#/components/parameters/Query.name'
+      responses:
+        '200':
+          description: A response body containing the query result as a rule.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rule'
+        '400':
+          description: Bad request.
+        '404':
+          description: Not found.
+    put:
+      tags:
+        - Context Information Provision
+      summary: Rule replacement
+      requestBody:
+        description: Payload body in the request contains a JSON object which represents the rule that is to replace an existing one.
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/Rule'
+                - oneOf:
+                    - required:
+                        - name
+                        - conditions
+                    - required:
+                        - name
+                        - event
+      responses:
+        '204':
+          description: No content.
+        '400':
+          description: Bad request.
+        '404':
+          description: Not found.
+    delete:
+      tags:
+        - Context Information Provision
+      summary: Rule deletion by name
+      parameters:
+        - $ref: '#/components/parameters/Query.name'
+      responses:
+        '204':
+          description: No content.
+        '400':
+          description: Bad request.
+        '404':
+          description: Not found.
+  /rules:
+    get:
+      tags:
+        - Context Information Consumption
+      summary: Query rules
+      responses:
+        '200':
+          description: A response body containing the query result as a list of rules.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Rule'
+    post:
+      tags:
+        - Context Information Provision
+      summary: Rule creation
+      requestBody:
+        description: Payload body in the request contains a JSON object which represents the rule that is to be created.
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/Rule'
+                - required:
+                    - name
+                    - conditions
+                    - event
+      responses:
+        '201':
+          description: Created.
+        '400':
+          description: Bad request.
+        '422':
+          description: Unprocessable content.
+    delete:
+      tags:
+        - Context Information Provision
+      summary: Deleting rules
+      responses:
+        '204':
+          description: No content.
+
+components:
+  parameters:
+    Query.name:
+      name: name
+      in: query
+      description: Name of the rule to be obtained or deleted.
+      schema:
+        type: string
+      required: true
+  schemas:
+    Alert:
+      type: object
+      properties:
+        errorCode:
+          type: string
+        additionalParameters:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                oneOf:
+                  - type: string
+                  - type: number
+                  - type: integer
+                  - type: boolean
+    Rule:
+      type: object
+      properties:
+        name:
+          type: string
+        conditions:
+          type: object
+          properties:
+            all:
+              type: array
+              items:
+                $ref: '#/components/schemas/ConditionRule'
+            any:
+              type: array
+              items:
+                $ref: '#/components/schemas/ConditionRule'
+        event:
+          type: object
+          properties:
+            type:
+              type: string
+            params:
+              type: object
+              properties:
+                message:
+                  type: string
+    ConditionRule:
+      type: object
+      properties:
+        all:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConditionRule'
+        any:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConditionRule'
+        fact:
+          type: string
+        operator:
+          type: string
+        value:
+          oneOf:
+            - type: integer
+            - type: boolean

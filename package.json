@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "axios": "^1.7.2",
+    "express": "^4.19.2",
+    "fs-extra": "^11.2.0",
+    "json-rules-engine": "^6.5.0",
+    "jsonschema": "^1.4.1"
+  }
+}
