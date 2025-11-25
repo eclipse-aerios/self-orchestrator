@@ -1,0 +1,42 @@
+# Default values for enabler.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# String to partially override enabler.fullname template (will maintain the release name).
+nameOverride: ""
+# String to fully override enabler.fullname template.
+fullnameOverride: ""
+# Deploy all the components in specific K8s node(s).
+chartNodeSelector: {}
+
+# Component orchestrator values.
+orchestrator:
+  tier: self
+  replicaCount: 1
+
+  # Configuration of the container image.
+  imagePullSecrets: []
+  image:
+    repository: eclipseaerios/self-orchestrator
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+    pullPolicy: IfNotPresent
+
+  resources: {}
+  autoscaling:
+    enabled: false
+  podSecurityContext: {}
+  securityContext: {}
+    
+  # Include here the environment variables to be used in containers section of the component's manifest.
+  envVars:
+    aeriosEatUrl: ""
+    aeriosIota: false
+    aeriosIotaUrl: ""
+    aeriosIotaNode: ""
+
+  # Configure this parameters to deploy the component in specific K8s node(s).
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+

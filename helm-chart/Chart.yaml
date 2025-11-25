@@ -1,0 +1,10 @@
+apiVersion: v2
+appVersion: 1.2.0
+description: Self-orchestrator module of the Self-* modules of aeriOS
+keywords:
+- ravaga-helm-chart-generator
+- aeriOS
+- self-*
+name: self-orchestrator
+type: application
+version: 1.2.0

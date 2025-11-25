@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "orchestrator.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "orchestrator.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "orchestrator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "orchestrator.labels" . | nindent 8 }}
+    spec:
+      {{- with .Values.orchestrator.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.chartNodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if not .Values.chartNodeSelector }}
+        {{- with .Values.orchestrator.nodeSelector }}
+      nodeSelector:
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.orchestrator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.orchestrator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.orchestrator.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: facts-volume
+          hostPath:
+            path: /etc/aerios/self-orchestrator/facts
+            type: DirectoryOrCreate
+        - name: rules-volume
+          hostPath:
+            path: /etc/aerios/self-orchestrator/rules
+            type: DirectoryOrCreate
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: orchestrator
+          securityContext:
+            {{- toYaml .Values.orchestrator.securityContext | nindent 12 }}
+          image: "{{ .Values.orchestrator.image.repository }}:{{ .Values.orchestrator.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.orchestrator.image.pullPolicy }}
+          ports:
+            - containerPort: 8001
+              hostPort: 8001
+          volumeMounts:
+            - name: facts-volume
+              mountPath: /self-orchestrator/facts
+            - name: rules-volume
+              mountPath: /self-orchestrator/rules
+          resources:
+            {{- toYaml .Values.orchestrator.resources | nindent 12 }}
+          {{- with .Values.orchestrator.envVars }}
+          env:
+            - name: AERIOS_EAT_URL
+              value: {{ .aeriosEatUrl | quote }}
+            - name: AERIOS_IOTA
+              value: {{ .aeriosIota | quote }}
+            - name: AERIOS_IOTA_URL
+              value: {{ .aeriosIotaUrl | quote }}
+            - name: AERIOS_IOTA_NODE
+              value: {{ .aeriosIotaNode | quote }}
+          {{- end }}
