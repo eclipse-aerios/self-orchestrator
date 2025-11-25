@@ -1,0 +1,15 @@
+services:
+  aerios_self-orchestrator_svc:
+    container_name: aerios_self-orchestrator_ctr
+    image: eclipseaerios/self-orchestrator:1.2.0
+    restart: always
+    ports:
+      - "8001:8001"
+    volumes:
+      - "/etc/aerios/self-orchestrator/facts:/self-orchestrator/facts"
+      - "/etc/aerios/self-orchestrator/rules:/self-orchestrator/rules"
+    environment:
+      - AERIOS_EAT_URL=
+      - AERIOS_IOTA=
+      - AERIOS_IOTA_URL=
+      - AERIOS_IOTA_NODE=
